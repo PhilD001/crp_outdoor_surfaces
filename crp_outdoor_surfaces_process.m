@@ -15,9 +15,9 @@
 %% STEP 0: prepare data
 
 fld_root = pwd;                                  % make sure pwd points to root of repo
-data_file = [fld_root, filesep, 'data.zip'];
+data_file = [fld_root, filesep, 'test_data.zip'];
 
-fld = [fld_root, filesep, 'data'];               % setting path for processed data
+fld = [fld_root, filesep, 'test_data'];               % setting path for processed data
 fld_stats = [fld_root, filesep, 'Statistics'];
 if exist(fld, 'dir')
     disp('removing old processed data folder...')
