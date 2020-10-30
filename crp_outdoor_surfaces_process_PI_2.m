@@ -69,7 +69,7 @@ end
 
 %% STEP 3: CRP Analyses ===================================================
 
-surface = {'Grass','FlatEven','CobbleStone'};
+surface = {'Grass','FlatEven','CobbleStone', 'SlopeDown', 'SlopeUp', 'BnkL', 'BnkR'};
 for s = 1:length(surface)
     
     participant = GetSubDirsFirstLevelOnly([fld, filesep]);
