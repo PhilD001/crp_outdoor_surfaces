@@ -37,12 +37,12 @@ outdoor2zoo(fld)
 
 %% STEP 1: Delete unwanted files ==========================================
 
-word = ["Stair","Slope"];       % to identify all files containing Stair and Slope
+surfaces_ignored = {'Stair'};       % to identify all files containing Stair and Slope
 fl = engine('fld',fld);
 
 for f = 1:length(fl)
     [file_pth, file_name, ext] = fileparts(fl{f});
-    if contains(file_name, word)
+    if contains(file_name, surfaces_ignored)
         delete([file_name, ext])
         disp(['Deleting ', file_name])
     end
