@@ -6,13 +6,10 @@
 % 1) Add ~/crp_outdoor_surfaces/code to path using 'Add with Subfolders...'
 % 2) Change current working directory to root of ~/crp_outdoor_surfaces directory
 % 4) run this script for crp processing
-% 5) see the excel sheet generated in /Statistics/eventval.xls for MARP and DP 
+% 5) see the excel sheet generated in /Statistics/eventval.xls for MARP and DP
 %    values used for statistical analysis in paper
 
-% Notes
-% - tested on biomechZoo v1.4.10 (type zooinfo) under Matlab 2020a
-
-% Last updated by Philippe C. Dixon Feb 24th 2021
+% Last updated by Philippe C. Dixon Aug 3rd 2021
 
 %% STEP 0: prepare data
 
@@ -70,19 +67,20 @@ for f = 1:length(fl)
 end
 
 %% STEP 3: CRP Analyses ===================================================
-
+%
+side = 'R';
 surface = {'Grass','FlatEven','CobbleStone', 'SlopeDown', 'SlopeUp', 'BnkL', 'BnkR'};
 for s = 1:length(surface)
     
-    participant = GetSubDirsFirstLevelOnly([fld, filesep]);
-    for p = 1:length(participant)
+    participants = GetSubDirsFirstLevelOnly([fld, filesep]);
+    for p = 1:length(participants)
         
-        fld_ps = [fld, filesep, participant{p}, filesep, surface{s}];
+        fld_ps = [fld, filesep, participants{p}, filesep, surface{s}];
         fl = engine('fld', fld_ps, 'extension', 'zoo', 'search file', '_cycle_');
         
         disp(' ')
         disp(['extracting data from ', num2str(length(fl)), ' trials for subject ', ...
-            participant{p},' ...'])
+            participants{p},' ...'])
         
         % initialize stk for each CRP metric for a given surface/participant -------------
         KHCRP_stk = ones(length(fl), 101);
@@ -95,22 +93,22 @@ for s = 1:length(surface)
             data = data.data;
             
             % Extracts Stance phase indices based on existing gait events ------------
-            FS = data.RKnee.event.FS(1);  % Foot Strike
-            FO = data.RKnee.event.FO(1);  % Foot Off
+            FS1 = data.RKnee.event.([side, 'FS1'])(1);  % 1st foot strike
+            FS2 = data.RKnee.event.([side, 'FS2'])(1);  % 2nd (next foot strike
             
             % Extract Joint Angles ---------------------------------------------------------
-            Hip = data.RHip.line(FS:FO);
-            Knee = data.RKnee.line(FS:FO);
+            Hip = data.([side, 'Hip']).line(FS1:FS2);
+            Knee = data.([side, 'Knee']).line(FS1:FS2);
             
-            PaddedHip = data.RHip.line; % Pads with additional cycle on both ends
-            PaddedKnee = data.RKnee.line;
+            PaddedHip = data.([side, 'Hip']).line; % Pads with additional cycle on both ends
+            PaddedKnee = data.([side, 'Knee']).line;
             
             % Hip, knee, and ankle phase angle padded to nearest event on either side ------
             HipCyclePhase  = phase_angle(PaddedHip);
             KneeCyclePhase  = phase_angle(PaddedKnee);
             
             % CRP calculations -------------------------------------------------------------
-            KHCycleCRP = CRP(KneeCyclePhase(FS:FO),HipCyclePhase(FS:FO));
+            KHCycleCRP = CRP(KneeCyclePhase(FS1:FS2),HipCyclePhase(FS1:FS2));
             
             % Time Normalizes CRP curves to 100 percent (101 points) -----------------------
             KHCycleCRP_Norm = normalize_line(KHCycleCRP, 100, 'spline');
@@ -156,6 +154,8 @@ for s = 1:length(surface)
             events.MSw = [76,  mean(r(76:87)),    0];
             events.TSw = [88,  mean(r(88:100)),    0];
             
+            events.St = [1, mean(r(1:62)), 0];
+            events.Sw = [1, mean(r(63:100)), 0];
             data_ens.(ch{c}).event = events;
         end
         
@@ -175,8 +175,8 @@ end
 
 [subjects, surfaces] = extract_filestruct(fld); % gets subs names
 
-lcl_evts = {'IC', 'LR', 'MS', 'TS', 'PSw','ISw','MSw','TSw'};
+lcl_evts = {'IC', 'LR', 'MS', 'TS', 'PSw','ISw','MSw','TSw', 'St', 'Sw'};
 chns = {'KH_MARP','KH_DP'};
 
 eventval('fld', fld, 'dim1', unique(surfaces), 'dim2', subjects, 'ch', chns, ...
-         'localevents', lcl_evts, 'globalevents', 'none');
+    'localevents', lcl_evts, 'globalevents', 'none');

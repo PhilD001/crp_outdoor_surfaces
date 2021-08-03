@@ -50,12 +50,10 @@ for c = 1:length(cons)
                     ndata =  r.(cons{c}).(subs{s}).(trials{t}).(side).(chns{ch}).(cycles{n});
                     data = addchannel_data(data, [side, chns{ch}], ndata, 'video');
                     if ch == 1
-                        data.([side, chns{ch}]).event.FS = [evts(1) 0 0];
-                        data.([side, chns{ch}]).event.FO = [evts(2) 0 0];
+                        data.([side, chns{ch}]).event.([side,'FS1']) = [evts(1) 0 0];
+                        data.([side, chns{ch}]).event.([side,'FS2']) = [evts(2) 0 0];
                     end
                 end
-                
-               
                 
                 % Save all into to file
                 zsave(fname,data)        
